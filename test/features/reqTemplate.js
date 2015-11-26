@@ -468,4 +468,31 @@ describe('Request template', function() {
             }
         });
     });
+    it('should support uriTemplate, or, and, if', function() {
+        var template = new Template({
+            foo: '{{uriTemplate("{{options.host}}/{request.params.foo}/")}}',
+            bar: '{{or(and("","foo"),or("", if(1,"bla", "blub")))}}',
+        });
+        var request = {
+            headers: {
+                bar: 'a/bar',
+                baz: 'a/baz',
+                boo: 'a/boo',
+            },
+            uri: 'test.com',
+            body: {
+                field: 'method'
+            },
+            params: {
+                foo: 'a/foo',
+            }
+        };
+        var model = { request: request, options: { host: '/a/host' } };
+        var result = template.expand(model);
+        result.foo = result.foo(model);
+        assert.deepEqual(result, {
+            foo: '/a/host/a%2Ffoo/',
+            bar: "bla"
+        });
+    });
 });
